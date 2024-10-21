@@ -23,7 +23,7 @@ class AmenityList(Resource):
         try:
             new_amenity = facade.create_amenity(amenity_data)
         except ValueError as e:
-            return {"error": str(e)}
+            return {"error": "Invalid input data"}, 400
         return { "id": new_amenity.id, "name": new_amenity.name }, 201
 
     @api.response(200, 'List of amenities retrieved successfully')

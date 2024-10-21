@@ -129,7 +129,7 @@ class TestAmenityEndpoint(unittest.TestCase):
         self.assertEqual(data["name"], "Wiwi")
 
         data, status = post("amenities", {"name": "A" * 51})
-        self.assertEqual(data["error"], "Name must not exceed 50 characters")
+        self.assertEqual(data["error"], "Invalid input data")
 
 
 if __name__ == '__main__':
