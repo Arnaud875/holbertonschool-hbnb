@@ -20,14 +20,17 @@ class ReviewList(Resource):
     @api.response(400, 'Invalid input data')
     def post(self):
         """Register a new review"""
-        # Placeholder for the logic to register a new review
-        pass
+        review_data = api.payload
+        try:
+            new_review = facade.create_review(review_data)
+        except ValueError as e:
+            return {"error": "Invalid input data"}, 400
+        return {"id": new_review.id, "name": new_review.nam}, 201
 
     @api.response(200, 'List of reviews retrieved successfully')
     def get(self):
         """Retrieve a list of all reviews"""
-        # Placeholder for logic to return a list of all reviews
-        pass
+        return [{ "id": i.id, "name": i.name } for i in facade.get_all_reviews()], 200
 
 @api.route('/<review_id>')
 class ReviewResource(Resource):
@@ -35,8 +38,10 @@ class ReviewResource(Resource):
     @api.response(404, 'Review not found')
     def get(self, review_id):
         """Get review details by ID"""
-        # Placeholder for the logic to retrieve a review by ID
-        pass
+        obj = facade.get_review(review_id)
+        if not obj:
+            return {"error": "Review not found"}, 404
+        return { "id": obj.id, "name": obj.name }
 
     @api.expect(review_model)
     @api.response(200, 'Review updated successfully')
@@ -44,15 +49,19 @@ class ReviewResource(Resource):
     @api.response(400, 'Invalid input data')
     def put(self, review_id):
         """Update a review's information"""
-        # Placeholder for the logic to update a review by ID
-        pass
+        obj = facade.get_review(review_id)
+        if not obj:
+            return {"error": "Review not found"}, 404
 
     @api.response(200, 'Review deleted successfully')
     @api.response(404, 'Review not found')
     def delete(self, review_id):
         """Delete a review"""
-        # Placeholder for the logic to delete a review
-        pass
+        if review_id in self.data:
+            del self.data[review_id]
+            return {"Review deleted successfully"}, 200
+        else:
+            return {"error": "Review not found"}, 404 
 
 @api.route('/places/<place_id>/reviews')
 class PlaceReviewList(Resource):
