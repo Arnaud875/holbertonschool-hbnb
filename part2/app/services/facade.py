@@ -36,21 +36,26 @@ class HBnBFacade:
         amenity.name = amenity_data
         return amenity
 
-    #  reviews à éditer
+    #  reviews methods to edit
     def create_review(self, review_data):
-        pass
+        review = Review(**review_data)
+        self.review_repo.add(review)
+        return review
 
     def get_review(self, review_id):
-        pass
+        return self.review_repo.get(review_id)
 
     def get_all_reviews(self):
-        pass
+        return self.review_repo.get_all()
 
     def get_reviews_by_place(self, place_id):
-        pass
+        return self.review_repo.get_by_attribute('place', place_id)
 
     def update_review(self, review_id, review_data):
-        pass
+        review = self.get_review(review_id)
+        review.data = review_data
+        return review
 
     def delete_review(self, review_id):
+        # Placeholder for logic to delete a review
         pass
