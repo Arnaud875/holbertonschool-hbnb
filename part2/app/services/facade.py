@@ -34,3 +34,22 @@ class HBnBFacade:
         amenity = self.get_amenity(amenity_id)
         amenity.name = amenity_data
         return amenity
+
+    #  reviews à éditer
+    def create_review(self, review_data):
+        pass
+
+    def get_review(self, review_id):
+        pass
+
+    def get_all_reviews(self):
+        pass
+
+    def get_reviews_by_place(self, place_id):
+        pass
+
+    def update_review(self, review_id, review_data):
+        pass
+
+    def delete_review(self, review_id):
+        pass
