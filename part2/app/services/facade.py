@@ -20,6 +20,9 @@ class HBnBFacade:
     def get_user_by_email(self, email):
         return self.user_repo.get_by_attribute('email', email)
 
+    def update_user(self, user_id, user_data):
+        return self.user_repo.update(user_id, user_data)
+
     def create_amenity(self, amenity_data):
         amenity = Amenity(**amenity_data)
         self.amenity_repo.add(amenity)
@@ -32,9 +35,7 @@ class HBnBFacade:
         return self.amenity_repo.get_all()
 
     def update_amenity(self, amenity_id, amenity_data):
-        amenity = self.get_amenity(amenity_id)
-        amenity.name = amenity_data
-        return amenity
+        return self.amenity_repo.update(amenity_id, amenity_data)
 
     def create_review(self, review_data):
         review = Review(**review_data)

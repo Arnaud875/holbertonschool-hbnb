@@ -51,9 +51,5 @@ class AmenityResource(Resource):
         if not obj:
             return {"error": "Amenity not found"}, 404
 
-        name = api.payload.get("name")
-        if not name:
-            return {"error": "Invalid input data"}, 400
-
-        facade.update_amenity(amenity_id, name)
+        facade.update_amenity(amenity_id, api.payload)
         return {"message": "Amenity updated successfully"}, 200
