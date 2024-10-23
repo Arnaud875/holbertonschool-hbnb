@@ -25,7 +25,7 @@ class ReviewList(Resource):
             new_review = facade.create_review(review_data)
         except ValueError as e:
             return {"error": "Invalid input data"}, 400
-        return {"id": new_review.id, "name": new_review.nam}, 201
+        return {"id": new_review.id, "text": new_review.text, "rating": new_review.rating, "place": new_review.place, "user": new_review.user}, 201
 
     @api.response(200, 'List of reviews retrieved successfully')
     def get(self):
