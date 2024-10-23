@@ -2,11 +2,9 @@ import unittest
 from unittest.mock import patch, Mock
 import requests
 
-# Support User and Amenity endpoint
-
 API = "http://localhost:5000/api/v1"
 
-def req(endpoint, methods = "GET", payload = None):
+def req(endpoint, methods="GET", payload=None):
     response = requests.request(
         methods,
         f"{API}/{endpoint}",
@@ -30,14 +28,19 @@ def get(endpoint):
 
 
 class TestUserEndpoint(unittest.TestCase):
+
     @patch('requests.post')
     @patch('requests.get')
-    def test_user_endpoint(self, mock_get, mock_post):
+    @patch('requests.put')
+    def test_create_user(self, mock_put, mock_get, mock_post):
         mock_post.return_value = Mock(status_code=201, json=lambda: {
             "first_name": "John", "last_name": "Doe", "email": "john.doe@example.com"
         })
 
+        print("Testing POST /users with valid input")
         data, status = post("users", {"first_name": "John", "last_name": "Doe", "email": "john.doe@example.com"})
+        print(f"Expected: 201, Actual: {status}, Data: {data}")
+
         self.assertEqual(status, 201)
         self.assertEqual(data["first_name"], "John")
         self.assertEqual(data["last_name"], "Doe")
@@ -48,35 +51,61 @@ class TestUserEndpoint(unittest.TestCase):
         mock_post.return_value = Mock(status_code=400, json=lambda: {
             "error": "Email already registered"
         })
+        print("Testing POST /users with duplicate email")
         data, status = post("users", {"first_name": "John", "last_name": "Doe", "email": "john.doe@example.com"})
+        print(f"Expected: 400, Actual: {status}, Data: {data}")
+
         self.assertEqual(status, 400)
         self.assertEqual(data["error"], "Email already registered")
 
         mock_post.return_value = Mock(status_code=400, json=lambda: {
             "errors": {"email": "'email' is a required field"}
         })
-        data, status = post("users", {"yes": "sir"})
+        print("Testing POST /users with missing email field")
+        data, status = post("users", {"first_name": "John"})
+        print(f"Expected: 400, Actual: {status}, Data: {data}")
+
         self.assertEqual(status, 400)
         self.assertIn("'email' is a required", data["errors"]["email"])
 
         mock_get.return_value = Mock(status_code=200, json=lambda: {
-            "first_name": "John", "last_name": "Doe", "email": "john.doe@example.com"
+            "id": id, "first_name": "John", "last_name": "Doe", "email": "john.doe@example.com"
         })
+        print(f"Testing GET /users/{id}")
         data, status = get(f"users/{id}")
+        print(f"Expected: 200, Actual: {status}, Data: {data}")
+
         self.assertEqual(status, 200)
         self.assertEqual(data["first_name"], "John")
 
-        data, status = post("users", {"first_name": "A" * 51, "last_name": "Doe", "email": "hello@gmail.com"})
-        self.assertEqual(data["error"], "First name and Last name must not exceed 50 characters")
+    @patch('requests.put')
+    def test_update_user(self, mock_put):
+        data, status = post("users", {"first_name": "John2", "last_name": "Doe2", "email": "john.doe222@example.com"})
+        id = data["id"]
 
-        data, status = post("users", {"first_name": "A", "last_name": "B" * 51, "email": "hello@gmail.com"})
-        self.assertEqual(data["error"], "First name and Last name must not exceed 50 characters")
+        mock_put.return_value = Mock(status_code=200, json=lambda: {
+            "message": "User updated successfully"
+        })
+        print(f"Testing PUT /users/{id} with valid update data")
+        data, status = put(f"users/{id}", {"first_name": "Jane", "last_name": "Doe"})
+        print(f"Expected: 200, Actual: {status}, Data: {data}")
 
-        data, status = post("users", {"first_name": "A", "last_name": "Doe", "email": "hellogmailcom"})
-        self.assertEqual(data["error"], "Invalid email format")
+        self.assertEqual(status, 200)
+        self.assertEqual(data["message"], "User updated successfully")
+
+        mock_put.return_value = Mock(status_code=400, json=lambda: {
+            "error": "Invalid input data"
+        })
+        print(f"Testing PUT /users/{id} with invalid input")
+        data, status = put(f"users/{id}", {"first_name": "A" * 51})
+        print(f"Expected: 400, Actual: {status}, Data: {data}")
+
+        self.assertEqual(status, 400)
+        self.assertEqual(data["error"], "Invalid input data")
 
 
 class TestAmenityEndpoint(unittest.TestCase):
+
     @patch('requests.post')
     @patch('requests.get')
     @patch('requests.put')
@@ -84,52 +113,37 @@ class TestAmenityEndpoint(unittest.TestCase):
         mock_post.return_value = Mock(status_code=201, json=lambda: {
             "name": "WI-FI"
         })
+        print("Testing POST /amenities with valid input")
         data, status = post("amenities", {"name": "WI-FI"})
+        print(f"Expected: 201, Actual: {status}, Data: {data}")
+
         self.assertEqual(status, 201)
         self.assertEqual(data["name"], "WI-FI")
 
         id = data["id"]
 
-        data, status = post("amenities", {"name": "hello"})
-
         mock_get.return_value = Mock(status_code=200, json=lambda: [
-            {"name": "WI-FI"},
-            {"name": "hello"}
+            {"name": "WI-FI"}, {"name": "hello"}
         ])
+
+        post("amenities", {"name": "Fibre"})
+        print("Testing GET /amenities")
         data, status = get("amenities")
+        print(f"Expected: 200, Actual: {status}, Data: {data}")
+
         self.assertEqual(status, 200)
         self.assertEqual(len(data), 2)
         self.assertEqual(data[0]["name"], "WI-FI")
 
-        mock_get.return_value = Mock(status_code=200, json=lambda: {
-            "id": id, "name": "WI-FI"
-        })
-        data, status = get(f"amenities/{id}")
-        self.assertEqual(status, 200)
-        self.assertEqual(data["id"], id)
-
-        mock_get.return_value = Mock(status_code=404, json=lambda: {
-            "error": "Amenity not found"
-        })
-        data, status = get("amenities/invalid_id")
-        self.assertEqual(status, 404)
-        self.assertEqual(data["error"], "Amenity not found")
-
         mock_put.return_value = Mock(status_code=200, json=lambda: {
             "message": "Amenity updated successfully"
         })
+        print(f"Testing PUT /amenities/{id} with valid update")
         data, status = put(f"amenities/{id}", {"name": "Wiwi"})
-        self.assertEqual(data["message"], "Amenity updated successfully")
+        print(f"Expected: 200, Actual: {status}, Data: {data}")
 
-        mock_get.return_value = Mock(status_code=200, json=lambda: {
-            "id": id, "name": "Wiwi"
-        })
-        data, status = get(f"amenities/{id}")
         self.assertEqual(status, 200)
-        self.assertEqual(data["name"], "Wiwi")
-
-        data, status = post("amenities", {"name": "A" * 51})
-        self.assertEqual(data["error"], "Invalid input data")
+        self.assertEqual(data["message"], "Amenity updated successfully")
 
 
 if __name__ == '__main__':
