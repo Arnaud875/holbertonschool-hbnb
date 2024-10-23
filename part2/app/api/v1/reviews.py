@@ -41,7 +41,7 @@ class ReviewResource(Resource):
         obj = facade.get_review(review_id)
         if not obj:
             return {"error": "Review not found"}, 404
-        return { "id": obj.id, "text": obj.text, "rating": obj.rating, "user_id": obj.user_id, "place_id": obj.place_idgit }
+        return { "id": obj.id, "text": obj.text, "rating": obj.rating, "user_id": obj.user_id, "place_id": obj.place_id}
 
     @api.expect(review_model)
     @api.response(200, 'Review updated successfully')
@@ -54,8 +54,10 @@ class ReviewResource(Resource):
             return {"error": "Review not found"}, 404
         try:
             facade.update_review(review_id, api.payload)
+        except ValueError as ve:
+            return {"error": "Invalid input data"}, 400
         except Exception as e:
-            return {"error": "Invalid input data"}
+            return {"error": "An unexpected error occurred"}, 500
         return {"message": "Review updated successfully"}, 200
 
     @api.response(200, 'Review deleted successfully')
