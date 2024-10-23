@@ -56,5 +56,5 @@ class HBnBFacade:
         review.data = review_data
         return review
 
-    def delete_review(self, review_id):        
+    def delete_review(self, review_id):
         return self.review_repo.delete(review_id)

@@ -54,5 +54,8 @@ class UserResource(Resource):
         if not obj:
             return {"error": "User not found"}, 404
 
-        facade.update_user(user_id, api.payload)
+        try:
+            facade.update_user(user_id, api.payload)
+        except Exception as e:
+            return {"error": "Invalid input data"}
         return {"message": "User updated successfully"}, 200
