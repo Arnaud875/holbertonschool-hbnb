@@ -175,7 +175,7 @@ class TestReviewEndpoint(unittest.TestCase):
     @patch('request.put')
     @patch('request.get')
     def test_review_endpoints(self, mock_get, mock_post, mock_put):
-        mock_post.return_value = Mock(status_code=200, json=lambda: {
+        mock_post.return_value = Mock(status_code=201, json=lambda: {
             "text": "Great place to stay!", "rating": 5, "user_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6", "place_id": "1fa85f64-5717-4562-b3fc-2c963f66afa6"
         })
         print("Testing POST /reviews with valid input")
@@ -195,6 +195,26 @@ class TestReviewEndpoint(unittest.TestCase):
         print(f"Expected: 400, Actual: {status}, Data: {data}")
         self.assertEqual(status, 400)
         self.assertEqual(data["error"], "Invalid input data")
+
+        mock_get.return_value = Mock(status_code=200, json=lambda: {})
+
+        mock_get.return_value = Mock(status_code=200, json=lambda: {})
+
+        mock_get.return_value = Mock(status_code=404, json=lambda: {})
+
+        mock_put.return_value = Mock(status_code=200, json=lambda: {})
+
+        mock_put.return_value = Mock(status_code=404, json=lambda: {})
+
+        mock_put.return_value = Mock(status_code=400, json=lambda: {})
+
+        mock_delete.return_value = Mock(status_code=200, json=lambda: {})
+
+        mock_delete.return_value = Mock(status_code=404, json=lambda: {})
+
+        mock_get.return_value = Mock(status_code=200, json=lambda: {})
+
+        mock_get.return_value = Mock(status_code=404, json=lambda: {})
 
 
 if __name__ == '__main__':
