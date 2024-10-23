@@ -52,6 +52,11 @@ class ReviewResource(Resource):
         obj = facade.get_review(review_id)
         if not obj:
             return {"error": "Review not found"}, 404
+        try:
+            facade.update_review(review_id, api.payload)
+        except Exception as e:
+            return {"error": "Invalid input data"}
+        return {"message": "Review updated successfully"}, 200
 
     @api.response(200, 'Review deleted successfully')
     @api.response(404, 'Review not found')
