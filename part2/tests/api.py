@@ -146,5 +146,56 @@ class TestAmenityEndpoint(unittest.TestCase):
         self.assertEqual(data["message"], "Amenity updated successfully")
 
 
+'''class TestPlaceEndpoint à compléter'''
+#class TestPlaceEndpoint(unittest.TestCase):
+
+#    @patch('request.post')
+#    @patch('request.put')
+#    @patch('request.get')
+#    def test_place_endpoints(self, mock_get, mock_post, mock_put):
+#        mock_post.return_value = Mock(status_code=200, json=lambda: {
+#            "title": "Cosy Apartment", "description": "A nice place to stay", "price": "100.0", "latitude": "37.7749", "longitude": "-122.4194", "owner_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+#        })
+#        print("Testing POST /places with valid input")
+#        data, status = post("places", {"title": "Cosy Apartment", "description": "A nice place to stay", "price": "100.0", "latitude": "37.7749", "longitude": "-122.4194", "owner_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6"})
+#        print(f"Expected: 201, Actual: {status}, Data: {data}")
+#        self.assertEqual(status, 201)
+#        self.assertEqual(data["title"], "Cosy Apartment")
+#        self.assertEqual(data["description"], "A nice place to stay")
+#        self.assertEqual(data["price"], 100.0)
+#        self.assertEqual(data["latitude"], 37.7749)
+#        self.assertEqual(data["longitude"], -122.4194)
+#        self.assertEqual(data["owner_id"], "3fa85f64-5717-4562-b3fc-2c963f66afa6")
+
+
+'''class TestReviewEndpoint à revoir et compléter'''
+class TestReviewEndpoint(unittest.TestCase):
+
+    @patch('request.post')
+    @patch('request.put')
+    @patch('request.get')
+    def test_review_endpoints(self, mock_get, mock_post, mock_put):
+        mock_post.return_value = Mock(status_code=200, json=lambda: {
+            "text": "Great place to stay!", "rating": 5, "user_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6", "place_id": "1fa85f64-5717-4562-b3fc-2c963f66afa6"
+        })
+        print("Testing POST /reviews with valid input")
+        data, status = post("review")
+        print(f"Expected: 201, Actual: {status}, Data: {data}")
+        data, status = post("review", {"text": "Great place to stay!", "rating": 5, "user_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6", "place_id": "1fa85f64-5717-4562-b3fc-2c963f66afa6"})
+        self.assertEqual(data["text"], "Great place to stay!")
+        self.assertEqual(data["rating"], 5)
+        self.assertEqual(data["user_id"], "3fa85f64-5717-4562-b3fc-2c963f66afa6")
+        self.assertEqual(data["place_id"], "1fa85f64-5717-4562-b3fc-2c963f66afa6")
+
+        mock_post.return_value = Mock(status_code=400, json=lambda: {
+            "error": "Invalid input data"
+        })
+        print(f"Testing POST /review with invalid input")
+        data, status = post("review", {"text": "Great place to stay!", "rating": 5, "user_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6", "place_id": "1fa85f64-5717-4562-b3fc-2c963f66afa6"})
+        print(f"Expected: 400, Actual: {status}, Data: {data}")
+        self.assertEqual(status, 400)
+        self.assertEqual(data["error"], "Invalid input data")
+
+
 if __name__ == '__main__':
     unittest.main()
