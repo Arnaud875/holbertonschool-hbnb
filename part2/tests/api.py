@@ -194,26 +194,26 @@ class TestReviewEndpoint(unittest.TestCase):
         self.assertEqual(status, 400)
         self.assertEqual(data["error"], "Invalid input data")
 
-    def test_review_get(self, mock_get)
+    def test_review_get(self, mock_get):
         mock_get.return_value = Mock(status_code=200, json=lambda: {})
 
         mock_get.return_value = Mock(status_code=200, json=lambda: {})
 
         mock_get.return_value = Mock(status_code=404, json=lambda: {})
 
-    def test_review_update(self, mock_put)
+    def test_review_update(self, mock_put):
         mock_put.return_value = Mock(status_code=200, json=lambda: {})
 
         mock_put.return_value = Mock(status_code=404, json=lambda: {})
 
         mock_put.return_value = Mock(status_code=400, json=lambda: {})
 
-    def tests_review_delete(self, mock_delete)
+    def tests_review_delete(self, mock_delete):
         mock_delete.return_value = Mock(status_code=200, json=lambda: {})
 
         mock_delete.return_value = Mock(status_code=404, json=lambda: {})
 
-    def test_get_reviews_for_specific_place()
+    def test_get_reviews_for_specific_place():
         mock_get.return_value = Mock(status_code=200, json=lambda: {})
 
         mock_get.return_value = Mock(status_code=404, json=lambda: {})
