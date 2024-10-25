@@ -19,7 +19,7 @@ place_model = api.model("Place", {
     "price": fields.String(required=True, description="Place's rent price"),
     "latitude": fields.String(required=True, description="Place latitude"),
     "longitude": fields.String(required=True, description="Place longitude"),
-    "owner": fields.String(required=True, description="Place owner")
+    "owner": fields.String(required=True, description="Place owner"),
     "reviews": fields.String(required=False, description="Place's reviews"),
     "amenities": fields.String(required=False, description="Place's amenity")
 })
