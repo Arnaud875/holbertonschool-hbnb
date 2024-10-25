@@ -146,5 +146,90 @@ class TestAmenityEndpoint(unittest.TestCase):
         self.assertEqual(data["message"], "Amenity updated successfully")
 
 
+class TestReviewEndpoint(unittest.TestCase):
+
+    @patch('requests.post')
+    @patch('requests.get')
+    @patch('requests.put')
+    @patch('requests.delete')
+    def test_review_endpoint(self, mock_delete, mock_put, mock_get, mock_post):
+        mock_post.return_value = Mock(status_code=201, json=lambda: {
+            "id": "2fa85f64-5717-4562-b3fc-2c963f66afa6",
+            "text": "Great place to stay!",
+            "rating": 5,
+            "user_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+            "place_id": "1fa85f64-5717-4562-b3fc-2c963f66afa6"
+        })
+
+        print("Testing POST /reviews with valid input")
+        data, status = post("reviews/", {
+            "text": "Great place to stay!",
+            "rating": 5,
+            "user_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+            "place_id": "1fa85f64-5717-4562-b3fc-2c963f66afa6"
+        })
+        print(f"Expected: 201, Actual: {status}, Data: {data}")
+
+        self.assertEqual(status, 201)
+        self.assertEqual(data["text"], "Great place to stay!")
+        self.assertEqual(data["rating"], 5)
+
+        mock_get.return_value = Mock(status_code=200, json=lambda: [
+            {
+                "id": "2fa85f64-5717-4562-b3fc-2c963f66afa6",
+                "text": "Great place to stay!",
+                "rating": 5
+            }
+        ])
+
+        print("Testing GET /reviews")
+        data, status = get("reviews")
+        print(f"Expected: 200, Actual: {status}, Data: {data}")
+        review_id = data[0]['id']
+        self.assertEqual(status, 200)
+        self.assertEqual(len(data), 1)
+        self.assertEqual(data[0]['text'], "Great place to stay!")
+
+        mock_get.return_value = Mock(status_code=200, json=lambda: {
+            "id": "2fa85f64-5717-4562-b3fc-2c963f66afa6",
+            "text": "Great place to stay!",
+            "rating": 5,
+            "user_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+            "place_id": "1fa85f64-5717-4562-b3fc-2c963f66afa6"
+        })
+
+        print("Testing GET /reviews/<id>")
+        data, status = get(f"reviews/{review_id}")
+        print(f"Expected: 200, Actual: {status}, Data: {data}")
+
+        self.assertEqual(status, 200)
+        self.assertEqual(data["text"], "Great place to stay!")
+
+        mock_put.return_value = Mock(status_code=200, json=lambda: {
+            "message": "Review updated successfully"
+        })
+
+        print("Testing PUT /reviews/<id> with valid input")
+        data, status = put("reviews/2fa85f64-5717-4562-b3fc-2c963f66afa6", {
+            "text": "Amazing experience!",
+            "rating": 5
+        })
+        print(f"Expected: 200, Actual: {status}, Data: {data}")
+
+        self.assertEqual(status, 200)
+        self.assertEqual(data["message"], "Review updated successfully")
+
+        mock_delete.return_value = Mock(status_code=200, json=lambda: {
+            "message": "Review deleted successfully"
+        })
+
+        print("Testing DELETE /reviews/<id>")
+        data, status = delete("reviews/2fa85f64-5717-4562-b3fc-2c963f66afa6")
+        print(f"Expected: 200, Actual: {status}, Data: {data}")
+
+        self.assertEqual(status, 200)
+        self.assertEqual(data["message"], "Review deleted successfully")
+
+
 if __name__ == '__main__':
     unittest.main()
