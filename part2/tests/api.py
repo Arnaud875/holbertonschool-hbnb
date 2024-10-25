@@ -146,6 +146,82 @@ class TestAmenityEndpoint(unittest.TestCase):
         self.assertEqual(data["message"], "Amenity updated successfully")
 
 
+class TestPlaceEndpoint(unittest.TestCase):
+
+    @patch('requests.post')
+    @patch('requests.get')
+    def test_create_place(self, mock_get, mock_post):
+        mock_post.return_value = Mock(status_code=201, json=lambda: {
+            "id": "1fa85f64-5717-4562-b3fc-2c963f66afa6",
+            "title": "Cozy Apartment",
+            "description": "A nice place to stay",
+            "price": 100.0,
+            "latitude": 37.7749,
+            "longitude": -122.4194,
+            "owner_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+        })
+        
+        print("Testing POST /places with valid input")
+        data, status = post("places", {
+            "title": "Cozy Apartment",
+            "description": "A nice place to stay",
+            "price": 100.0,
+            "latitude": 37.7749,
+            "longitude": -122.4194,
+            "owner_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+        })
+        print(f"Expected: 201, Actual: {status}, Data: {data}")
+        
+        self.assertEqual(status, 201)
+        self.assertEqual(data["title"], "Cozy Apartment")
+        self.assertEqual(data["description"], "A nice place to stay")
+        
+        place_id = data["id"]
+
+        mock_get.return_value = Mock(status_code=200, json=lambda: [
+            {
+                "id": place_id,
+                "title": "Cozy Apartment",
+                "latitude": 37.7749,
+                "longitude": -122.4194
+            }
+        ])
+        
+        print("Testing GET /places")
+        data, status = get("places")
+        print(f"Expected: 200, Actual: {status}, Data: {data}")
+        
+        self.assertEqual(status, 200)
+        self.assertEqual(len(data), 1)
+        self.assertEqual(data[0]["title"], "Cozy Apartment")
+
+    @patch('requests.get')
+    def test_get_place_details(self, mock_get):
+        place_id = "1fa85f64-5717-4562-b3fc-2c963f66afa6"
+        
+        mock_get.return_value = Mock(status_code=200, json=lambda: {
+            "id": place_id,
+            "title": "Cozy Apartment",
+            "description": "A nice place to stay",
+            "latitude": 37.7749,
+            "longitude": -122.4194,
+            "owner": {
+                "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                "first_name": "John",
+                "last_name": "Doe"
+            }
+        })
+
+        print(f"Testing GET /places/{place_id}")
+        data, status = get(f"places/{place_id}")
+        print(f"Expected: 200, Actual: {status}, Data: {data}")
+        
+        self.assertEqual(status, 200)
+        self.assertEqual(data["title"], "Cozy Apartment")
+        self.assertEqual(data["description"], "A nice place to stay")
+        self.assertEqual(data["owner"]["first_name"], "John")
+
+
 class TestReviewEndpoint(unittest.TestCase):
 
     @patch('requests.post')
