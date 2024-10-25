@@ -14,8 +14,8 @@ def req(endpoint, methods="GET", payload=None):
 
     try:
         return response.json(), response.status_code
-    except:
-        raise ValueError(f"Invalid response of {endpoint} endpoint.")
+    except Exception as e:
+        raise ValueError(f"Invalid response of {endpoint} endpoint. {str(e)}")
 
 def post(endpoint, payload):
     return req(endpoint, "POST", payload)
@@ -165,7 +165,7 @@ class TestReviewEndpoint(unittest.TestCase):
         })
 
         print("Testing POST /reviews with valid input")
-        data, status = post("reviews", {
+        data, status = post("reviews/", {
             "text": "Great place to stay!",
             "rating": 5,
             "user_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
@@ -188,10 +188,10 @@ class TestReviewEndpoint(unittest.TestCase):
         print("Testing GET /reviews")
         data, status = get("reviews")
         print(f"Expected: 200, Actual: {status}, Data: {data}")
-
+        review_id = data[0]['id']
         self.assertEqual(status, 200)
         self.assertEqual(len(data), 1)
-        self.assertEqual(data[0]["text"], "Great place to stay!")
+        self.assertEqual(data[0]['text'], "Great place to stay!")
 
         mock_get.return_value = Mock(status_code=200, json=lambda: {
             "id": "2fa85f64-5717-4562-b3fc-2c963f66afa6",
@@ -202,7 +202,7 @@ class TestReviewEndpoint(unittest.TestCase):
         })
 
         print("Testing GET /reviews/<id>")
-        data, status = get("reviews/2fa85f64-5717-4562-b3fc-2c963f66afa6")
+        data, status = get(f"reviews/{review_id}")
         print(f"Expected: 200, Actual: {status}, Data: {data}")
 
         self.assertEqual(status, 200)
