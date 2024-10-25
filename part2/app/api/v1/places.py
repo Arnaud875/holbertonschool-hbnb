@@ -48,7 +48,7 @@ class PlaceList(Resource):
             new_place = facade.create_place(place_data)
         except ValueError as e:
             return {"error": str(e)}
-        
+
         owner = facade.get_user(new_place.owner)
         if not owner:
             return {'error': "Owner not found"}, 404
@@ -83,7 +83,7 @@ class PlaceResource(Resource):
         place = facade.get_place(place_id)
         if not place:
             return {"error": "Place not found"}, 404
-        
+
         owner = facade.get_user(place.owner)
         if not owner:
             return {'error': "Owner not found"}, 404
