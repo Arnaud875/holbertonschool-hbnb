@@ -5,23 +5,21 @@ Places' API.
 """
 
 
-from flask import Flask
 from flask_restx import fields, Namespace, Resource
 from app.services.facade import HBnBFacade
 
 
 api = Namespace("places", description="Place operations")
-app = Flask(__name__)
 facade = HBnBFacade.get_instance()
 place_model = api.model("Place", {
     "title": fields.String(required=True, description="Place title"),
     "description": fields.String(required=True, description="Place desc."),
-    "price": fields.String(required=True, description="Place's rent price"),
-    "latitude": fields.String(required=True, description="Place latitude"),
-    "longitude": fields.String(required=True, description="Place longitude"),
-    "owner": fields.String(required=True, description="Place owner"),
-    "reviews": fields.String(required=False, description="Place's reviews"),
-    "amenities": fields.String(required=False, description="Place's amenity")
+    "price": fields.Float(required=True, description="Place's rent price"),
+    "latitude": fields.Float(required=True, description="Place latitude"),
+    "longitude": fields.Float(required=True, description="Place longitude"),
+    "owner": fields.Integer(required=True, description="Place owner"),
+    "reviews": fields.List(required=False, description="Place's reviews"),
+    "amenities": fields.List(required=False, description="Place's amenity")
 })
 
 

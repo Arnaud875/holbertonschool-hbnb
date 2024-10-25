@@ -1,7 +1,5 @@
 from flask_restx import Namespace, Resource, fields
-from flask import jsonify
 from app.services.facade import HBnBFacade
-import json
 
 api = Namespace('amenities', description='Amenity operations')
 
