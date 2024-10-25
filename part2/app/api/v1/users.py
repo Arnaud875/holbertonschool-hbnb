@@ -10,7 +10,7 @@ user_model = api.model('User', {
     'email': fields.String(required=True, description='Email of the user')
 })
 
-facade = HBnBFacade()
+facade = HBnBFacade.get_instance()
 
 @api.route('/')
 class UserList(Resource):

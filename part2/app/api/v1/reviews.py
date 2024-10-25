@@ -11,7 +11,7 @@ review_model = api.model('Review', {
     'place_id': fields.String(required=True, description='ID of the place')
 })
 
-facade = HBnBFacade()
+facade = HBnBFacade.get_instance()
 
 @api.route('/')
 class ReviewList(Resource):
@@ -63,12 +63,13 @@ class ReviewResource(Resource):
     @api.response(200, 'Review deleted successfully')
     @api.response(404, 'Review not found')
     def delete(self, review_id):
+        # TODO: Ne supprime pas la review en mémoire
         """Delete a review"""
         if review_id in self.data:
             del self.data[review_id]
             return {"Review deleted successfully"}, 200
         else:
-            return {"error": "Review not found"}, 404 
+            return {"error": "Review not found"}, 404
 
 @api.route('/places/<place_id>/reviews')
 class PlaceReviewList(Resource):

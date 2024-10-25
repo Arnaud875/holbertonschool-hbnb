@@ -3,6 +3,14 @@ from app.models import *
 
 
 class HBnBFacade:
+    INSTANCE = None
+
+    @classmethod
+    def get_instance(cls):
+        if cls.INSTANCE is None:
+            cls.INSTANCE = HBnBFacade()
+        return cls.INSTANCE
+
     def __init__(self):
         self.user_repo = InMemoryRepository()
         self.place_repo = InMemoryRepository()

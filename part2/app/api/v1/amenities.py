@@ -10,7 +10,7 @@ amenity_model = api.model('Amenity', {
     'name': fields.String(required=True, description='Name of the amenity')
 })
 
-facade = HBnBFacade()
+facade = HBnBFacade.get_instance()
 
 @api.route('/')
 class AmenityList(Resource):
