@@ -2,310 +2,504 @@ import unittest
 from unittest.mock import patch, Mock
 import requests
 
-API = "http://localhost:5000/api/v1"
+unittest.TestLoader.sortTestMethodsUsing = None
+"""
+Addr: http://localhost:5000/api/v1
 
-def req(endpoint, methods="GET", payload=None):
-    response = requests.request(
-        methods,
-        f"{API}/{endpoint}",
-        headers={"Content-Type": "application/json"} if methods == "POST" or methods == "PUT" else None,
-        json=payload if methods == "POST" or methods == "PUT" else None
-    )
+User:
+POST /api/v1/users/
+Content-Type: application/json
+{"first_name": "John","last_name": "Doe","email": "john.doe@example.com"}
 
-    try:
-        return response.json(), response.status_code
-    except:
-        raise ValueError(f"Invalid response of {endpoint} endpoint.")
+Expected Response:
+{"id": "3fa85f64-5717-4562-b3fc-2c963f66afa6","first_name": "John","last_name": "Doe","email": "john.doe@example.com"}
+201 Created: When the user is successfully created.
+400 Bad Request: If the email is already registered or input data is invalid.
 
-def post(endpoint, payload):
-    return req(endpoint, "POST", payload)
+GET /api/v1/users/<user_id>
+Content-Type: application/json
 
-def put(endpoint, payload):
-    return req(endpoint, "PUT", payload)
+Expected Response:
+{"id": "3fa85f64-5717-4562-b3fc-2c963f66afa6","first_name": "John","last_name": "Doe","email": "john.doe@x.com"}
+200 OK: When the user is successfully retrieved.
+404 Not Found: If the user does not exist.
 
-def get(endpoint):
-    return req(endpoint, "GET")
+GET /api/v1/users/
+Content-Type: application/json
+
+Expected Response:
+[{"id": "3fa85f64-5717-4562-b3fc-2c963f66afa6","first_name": "John","last_name": "Doe","email": "john.doe@example.com"},]
+200 OK: When the list of users is successfully retrieved.
+
+PUT /api/v1/users/<user_id>
+Content-Type: application/json
+{"first_name": "Jane","last_name": "Doe","email": "jane.doe@example.com"}
+
+Expected Response:
+{"id": "3fa85f64-5717-4562-b3fc-2c963f66afa6","first_name": "Jane","last_name": "Doe","email": "jane.doe@example.com"}
+200 OK: When the user is successfully updated.
+404 Not Found: If the user does not exist.
+400 Bad Request: If input data is invalid.
+
+Amenities:
+POST /api/v1/amenities/
+Content-Type: application/json
+{"name": "Wi-Fi"}
+
+Expected Response:
+{"id": "1fa85f64-5717-4562-b3fc-2c963f66afa6","name": "Wi-Fi"}
+201 Created: When the amenity is successfully created.
+400 Bad Request: If input data is invalid.
+
+GET /api/v1/amenities/
+Content-Type: application/json
+
+Expected Response:
+[{"id": "1fa85f64-5717-4562-b3fc-2c963f66afa6","name": "Wi-Fi"},{"id": "2fa85f64-5717-4562-b3fc-2c963f66afa6","name": "Air Conditioning"}]
+200 OK: List of amenities retrieved successfully.
+
+GET /api/v1/amenities/<amenity_id>
+Content-Type: application/json
+
+Expected Response:
+{"id": "1fa85f64-5717-4562-b3fc-2c963f66afa6","name": "Wi-Fi"}
+200 OK: When the amenity is successfully retrieved.
+404 Not Found: If the amenity does not exist.
+
+PUT /api/v1/amenities/<amenity_id>
+Content-Type: application/json
+{"name": "Air Conditioning"}
+
+Expected Response:
+{"message": "Amenity updated successfully"}
+200 OK: When the amenity is successfully updated.
+404 Not Found: If the amenity does not exist.
+400 Bad Request: If input data is invalid.
+
+Places:
+
+POST /api/v1/places/
+Content-Type: application/json
+{"title": "Cozy Apartment","description": "A nice place to stay","price": 100.0,"latitude": 37.7749,"longitude": -122.4194,"owner_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6"}
+
+Expected Response:
+{"id": "1fa85f64-5717-4562-b3fc-2c963f66afa6","title": "Cozy Apartment","description": "A nice place to stay","price": 100.0,"latitude": 37.7749,"longitude": -122.4194,"owner_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6"}
+201 Created: When the place is successfully created.
+400 Bad Request: If input data is invalid.
+
+GET /api/v1/places/
+Content-Type: application/json
+
+Expected Response:
+[{"id": "1fa85f64-5717-4562-b3fc-2c963f66afa6","title": "Cozy Apartment","latitude": 37.7749,"longitude": -122.4194},]
+200 OK: List of places retrieved successfully.
+
+GET /api/v1/places/<place_id>
+Content-Type: application/json
+
+Expected Response:
+{"id": "1fa85f64-5717-4562-b3fc-2c963f66afa6","title": "Cozy Apartment","description": "A nice place to stay","latitude": 37.7749,"longitude": -122.4194,
+"owner": {"id": "3fa85f64-5717-4562-b3fc-2c963f66afa6","first_name": "John","last_name": "Doe","email": "john.doe@example.com"},
+"amenities": [{"id": "4fa85f64-5717-4562-b3fc-2c963f66afa6","name": "Wi-Fi"},{"id": "5fa85f64-5717-4562-b3fc-2c963f66afa6","name": "Air Conditioning"}]}
+200 OK: When the place and its associated owner and amenities are successfully retrieved.
+404 Not Found: If the place does not exist.
+
+PUT /api/v1/places/<place_id>
+Content-Type: application/json
+{"title": "Luxury Condo","description": "An upscale place to stay","price": 200.0}
+
+Expected Response:
+{"message": "Place updated successfully"}
+200 OK: When the place is successfully updated.
+404 Not Found: If the place does not exist.
+400 Bad Request: If input data is invalid.
+
+Reviews:
+
+POST /api/v1/reviews/
+Content-Type: application/json
+{"text": "Great place to stay!","rating": 5,"user_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6","place_id": "1fa85f64-5717-4562-b3fc-2c963f66afa6"}
+
+Expected Response:
+{"id": "2fa85f64-5717-4562-b3fc-2c963f66afa6","text": "Great place to stay!","rating": 5,"user_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6","place_id": "1fa85f64-5717-4562-b3fc-2c963f66afa6"}
+201 Created: When the review is successfully created.
+400 Bad Request: If input data is invalid.
+
+GET /api/v1/reviews/
+Expected Response:
+[{"id": "2fa85f64-5717-4562-b3fc-2c963f66afa6","text": "Great place to stay!","rating": 5},]
+200 OK: List of reviews retrieved successfully.
+
+GET /api/v1/reviews/<review_id>
+Expected Response:
+{"id": "2fa85f64-5717-4562-b3fc-2c963f66afa6","text": "Great place to stay!","rating": 5,"user_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6","place_id": "1fa85f64-5717-4562-b3fc-2c963f66afa6"}
+200 OK: When the review is successfully retrieved.
+404 Not Found: If the review does not exist.
 
 
-class TestUserEndpoint(unittest.TestCase):
+PUT /api/v1/reviews/<review_id>
+Content-Type: application/json
+{"text": "Amazing stay!","rating": 4}
 
-    @patch('requests.post')
-    @patch('requests.get')
-    @patch('requests.put')
-    def test_create_user(self, mock_put, mock_get, mock_post):
-        mock_post.return_value = Mock(status_code=201, json=lambda: {
-            "first_name": "John", "last_name": "Doe", "email": "john.doe@example.com"
-        })
-
-        print("Testing POST /users with valid input")
-        data, status = post("users", {"first_name": "John", "last_name": "Doe", "email": "john.doe@example.com"})
-        print(f"Expected: 201, Actual: {status}, Data: {data}")
-
-        self.assertEqual(status, 201)
-        self.assertEqual(data["first_name"], "John")
-        self.assertEqual(data["last_name"], "Doe")
-        self.assertEqual(data["email"], "john.doe@example.com")
-
-        id = data["id"]
-
-        mock_post.return_value = Mock(status_code=400, json=lambda: {
-            "error": "Email already registered"
-        })
-        print("Testing POST /users with duplicate email")
-        data, status = post("users", {"first_name": "John", "last_name": "Doe", "email": "john.doe@example.com"})
-        print(f"Expected: 400, Actual: {status}, Data: {data}")
-
-        self.assertEqual(status, 400)
-        self.assertEqual(data["error"], "Email already registered")
-
-        mock_post.return_value = Mock(status_code=400, json=lambda: {
-            "errors": {"email": "'email' is a required field"}
-        })
-        print("Testing POST /users with missing email field")
-        data, status = post("users", {"first_name": "John"})
-        print(f"Expected: 400, Actual: {status}, Data: {data}")
-
-        self.assertEqual(status, 400)
-        self.assertIn("'email' is a required", data["errors"]["email"])
-
-        mock_get.return_value = Mock(status_code=200, json=lambda: {
-            "id": id, "first_name": "John", "last_name": "Doe", "email": "john.doe@example.com"
-        })
-        print(f"Testing GET /users/{id}")
-        data, status = get(f"users/{id}")
-        print(f"Expected: 200, Actual: {status}, Data: {data}")
-
-        self.assertEqual(status, 200)
-        self.assertEqual(data["first_name"], "John")
-
-    @patch('requests.put')
-    def test_update_user(self, mock_put):
-        data, status = post("users", {"first_name": "John2", "last_name": "Doe2", "email": "john.doe222@example.com"})
-        id = data["id"]
-
-        mock_put.return_value = Mock(status_code=200, json=lambda: {
-            "message": "User updated successfully"
-        })
-        print(f"Testing PUT /users/{id} with valid update data")
-        data, status = put(f"users/{id}", {"first_name": "Jane", "last_name": "Doe"})
-        print(f"Expected: 200, Actual: {status}, Data: {data}")
-
-        self.assertEqual(status, 200)
-        self.assertEqual(data["message"], "User updated successfully")
-
-        mock_put.return_value = Mock(status_code=400, json=lambda: {
-            "error": "Invalid input data"
-        })
-        print(f"Testing PUT /users/{id} with invalid input")
-        data, status = put(f"users/{id}", {"first_name": "A" * 51})
-        print(f"Expected: 400, Actual: {status}, Data: {data}")
-
-        self.assertEqual(status, 400)
-        self.assertEqual(data["error"], "Invalid input data")
+Expected Response:
+{"message": "Review updated successfully"}
+200 OK: When the review is successfully updated.
+404 Not Found: If the review does not exist.
+400 Bad Request: If input data is invalid.
 
 
-class TestAmenityEndpoint(unittest.TestCase):
+DELETE /api/v1/reviews/<review_id>
+Expected Response:
+{"message": "Review deleted successfully"}
+200 OK: When the review is successfully deleted.
+404 Not Found: If the review does not exist.
 
-    @patch('requests.post')
-    @patch('requests.get')
-    @patch('requests.put')
-    def test_amenity_endpoint(self, mock_put, mock_get, mock_post):
-        mock_post.return_value = Mock(status_code=201, json=lambda: {
-            "name": "WI-FI"
-        })
-        print("Testing POST /amenities with valid input")
-        data, status = post("amenities", {"name": "WI-FI"})
-        print(f"Expected: 201, Actual: {status}, Data: {data}")
+GET /api/v1/places/<place_id>/reviews
+Expected Response:
+[{"id": "2fa85f64-5717-4562-b3fc-2c963f66afa6","text": "Great place to stay!","rating": 5},{"id": "3fa85f64-5717-4562-b3fc-2c963f66afa6","text": "Very comfortable and clean.","rating": 4}]
+200 OK: List of reviews for the place retrieved successfully.
+404 Not Found: If the place does not exist.
 
-        self.assertEqual(status, 201)
-        self.assertEqual(data["name"], "WI-FI")
+"""
 
-        id = data["id"]
+import unittest
+import requests
 
-        mock_get.return_value = Mock(status_code=200, json=lambda: [
-            {"name": "WI-FI"}, {"name": "hello"}
-        ])
+BASE_URL_USERS = "http://localhost:5000/api/v1/users/"
+BASE_URL_AMENITIES = "http://localhost:5000/api/v1/amenities/"
+BASE_URL_PLACES = "http://localhost:5000/api/v1/places/"
+BASE_URL_REVIEWS = "http://localhost:5000/api/v1/reviews/"
 
-        post("amenities", {"name": "Fibre"})
-        print("Testing GET /amenities")
-        data, status = get("amenities")
-        print(f"Expected: 200, Actual: {status}, Data: {data}")
+user_id = None
+amenities_id = None
+place_id = None
+review_id = None
 
-        self.assertEqual(status, 200)
-        self.assertEqual(len(data), 2)
-        self.assertEqual(data[0]["name"], "WI-FI")
+class Test_1_UserAPI(unittest.TestCase):
 
-        mock_put.return_value = Mock(status_code=200, json=lambda: {
-            "message": "Amenity updated successfully"
-        })
-        print(f"Testing PUT /amenities/{id} with valid update")
-        data, status = put(f"amenities/{id}", {"name": "Wiwi"})
-        print(f"Expected: 200, Actual: {status}, Data: {data}")
+    def setUp(self):
+        # Called before each test, can be used to initialize any data or state.
+        self.test_user = {
+            "first_name": "John",
+            "last_name": "Doe",
+            "email": "john.doe@example.com"
+        }
+        self.headers = {"Content-Type": "application/json"}
+        self.user_id = None
 
-        self.assertEqual(status, 200)
+    def test_1_create_user_success(self):
+        response = requests.post(BASE_URL_USERS, json=self.test_user, headers=self.headers)
+        self.assertEqual(response.status_code, 201)
+        data = response.json()
+        self.assertIn("id", data)
+        self.assertEqual(data["first_name"], self.test_user["first_name"])
+        self.assertEqual(data["last_name"], self.test_user["last_name"])
+        self.assertEqual(data["email"], self.test_user["email"])
+
+        global user_id
+        user_id = data["id"]
+
+    def test_2_create_user_duplicate_email(self):
+        # Assuming this email is already used by a user.
+        response = requests.post(BASE_URL_USERS, json=self.test_user, headers=self.headers)
+        self.assertEqual(response.status_code, 400)
+
+    def test_3_create_user_invalid_data(self):
+        # Missing required fields in the payload
+        invalid_user = {"first_name": "Incomplete"}
+        response = requests.post(BASE_URL_USERS, json=invalid_user, headers=self.headers)
+        self.assertEqual(response.status_code, 400)
+
+    def test_4_get_user_success(self):
+        # Retrieve the user by ID
+        response = requests.get(f"{BASE_URL_USERS}{user_id}", headers=self.headers)
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertEqual(data["first_name"], self.test_user["first_name"])
+        self.assertEqual(data["last_name"], self.test_user["last_name"])
+        self.assertEqual(data["email"], self.test_user["email"])
+
+    def test_5_get_user_not_found(self):
+        # Use a non-existent user ID
+        response = requests.get(f"{BASE_URL_USERS}nonexistent_id", headers=self.headers)
+        self.assertEqual(response.status_code, 404)
+
+    def test_6_list_users_success(self):
+        response = requests.get(BASE_URL_USERS, headers=self.headers)
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertIsInstance(data, list)
+
+    def test_7_update_user_success(self):
+        # Update user data
+        updated_user = {
+            "first_name": "Jane",
+            "last_name": "Doe",
+            "email": "jane.doe@example.com"
+        }
+        response = requests.put(f"{BASE_URL_USERS}{user_id}", json=updated_user, headers=self.headers)
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertEqual(data["first_name"], updated_user["first_name"])
+        self.assertEqual(data["last_name"], updated_user["last_name"])
+        self.assertEqual(data["email"], updated_user["email"])
+
+    def test_8_update_user_not_found(self):
+        # Attempt to update a non-existent user
+        updated_user = {
+            "first_name": "Jane",
+            "last_name": "Doe",
+            "email": "jane.doe@example.com"
+        }
+        response = requests.put(f"{BASE_URL_USERS}nonexistent_id", json=updated_user, headers=self.headers)
+        self.assertEqual(response.status_code, 404)
+
+    def test_9_update_user_invalid_data(self):
+        # Attempt update with invalid data
+        invalid_user = {"email": "not-an-email"}
+        response = requests.put(f"{BASE_URL_USERS}{user_id}", json=invalid_user, headers=self.headers)
+        self.assertEqual(response.status_code, 400)
+
+class Test_2_AmenityAPI(unittest.TestCase):
+
+    def setUp(self):
+        # Initialisation des données et des en-têtes pour chaque test
+        self.test_amenity = {"name": "Wi-Fi"}
+        self.updated_amenity = {"name": "Air Conditioning"}
+        self.headers = {"Content-Type": "application/json"}
+        self.amenity_id = None
+
+    def test_1_create_amenity_success(self):
+        # Création d'une nouvelle amenity avec succès
+        response = requests.post(BASE_URL_AMENITIES, json=self.test_amenity, headers=self.headers)
+        self.assertEqual(response.status_code, 201)
+        data = response.json()
+        self.assertIn("id", data)
+        self.assertEqual(data["name"], self.test_amenity["name"])
+
+        # Sauvegarde de l'ID pour utilisation dans d'autres tests
+        self.amenity_id = data["id"]
+
+        global amenities_id
+        amenities_id = data["id"]
+
+    def test_2_create_amenity_invalid_data(self):
+        # Tentative de création avec des données invalides (nom manquant)
+        invalid_amenity = {}
+        response = requests.post(BASE_URL_AMENITIES, json=invalid_amenity, headers=self.headers)
+        self.assertEqual(response.status_code, 400)
+
+    def test_3_get_amenity_list_success(self):
+        # Récupération de la liste des amenities
+        response = requests.get(BASE_URL_AMENITIES, headers=self.headers)
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertIsInstance(data, list)
+
+    def test_4_get_amenity_by_id_success(self):
+        # Vérification de l'ID de l'amenity créé
+        if not self.amenity_id:
+            self.test_1_create_amenity_success()
+
+        # Récupération de l'amenity spécifique
+        response = requests.get(f"{BASE_URL_AMENITIES}{self.amenity_id}", headers=self.headers)
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertEqual(data["id"], self.amenity_id)
+        self.assertEqual(data["name"], self.test_amenity["name"])
+
+    def test_5_get_amenity_by_id_not_found(self):
+        # Tentative de récupération d'une amenity non existante
+        response = requests.get(f"{BASE_URL_AMENITIES}nonexistent_id", headers=self.headers)
+        self.assertEqual(response.status_code, 404)
+
+    def test_6_update_amenity_success(self):
+        # Vérification de l'ID de l'amenity créé
+        if not self.amenity_id:
+            self.test_1_create_amenity_success()
+
+        # Mise à jour de l'amenity
+        response = requests.put(f"{BASE_URL_AMENITIES}{self.amenity_id}", json=self.updated_amenity, headers=self.headers)
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
         self.assertEqual(data["message"], "Amenity updated successfully")
 
+    def test_7_update_amenity_not_found(self):
+        # Tentative de mise à jour d'une amenity non existante
+        response = requests.put(f"{BASE_URL_AMENITIES}nonexistent_id", json=self.updated_amenity, headers=self.headers)
+        self.assertEqual(response.status_code, 404)
 
-class TestPlaceEndpoint(unittest.TestCase):
+    def test_8_update_amenity_invalid_data(self):
+        # Mise à jour avec des données invalides
+        invalid_data = {"name": ""}
+        if not self.amenity_id:
+            self.test_1_create_amenity_success()
 
-    @patch('requests.post')
-    @patch('requests.get')
-    def test_create_place(self, mock_get, mock_post):
-        mock_post.return_value = Mock(status_code=201, json=lambda: {
-            "id": "1fa85f64-5717-4562-b3fc-2c963f66afa6",
+        response = requests.put(f"{BASE_URL_AMENITIES}{self.amenity_id}", json=invalid_data, headers=self.headers)
+        self.assertEqual(response.status_code, 400)
+
+class Test_3_PlaceAPI(unittest.TestCase):
+
+    def setUp(self):
+        self.headers = {"Content-Type": "application/json"}
+        self.place_data = {
             "title": "Cozy Apartment",
             "description": "A nice place to stay",
             "price": 100.0,
             "latitude": 37.7749,
             "longitude": -122.4194,
-            "owner_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
-        })
-        
-        print("Testing POST /places with valid input")
-        data, status = post("places", {
-            "title": "Cozy Apartment",
-            "description": "A nice place to stay",
-            "price": 100.0,
-            "latitude": 37.7749,
-            "longitude": -122.4194,
-            "owner_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
-        })
-        print(f"Expected: 201, Actual: {status}, Data: {data}")
-        
-        self.assertEqual(status, 201)
-        self.assertEqual(data["title"], "Cozy Apartment")
-        self.assertEqual(data["description"], "A nice place to stay")
-        
+            "owner": user_id
+        }
+        self.place_id = None
+
+    def test_1_create_place_success(self):
+        response = requests.post(BASE_URL_PLACES, json=self.place_data, headers=self.headers)
+        self.assertEqual(response.status_code, 201)
+        data = response.json()
+        self.assertIn("id", data)
+        self.assertEqual(data["title"], self.place_data["title"])
+        self.place_id = data["id"]
+
+        global place_id
         place_id = data["id"]
 
-        mock_get.return_value = Mock(status_code=200, json=lambda: [
-            {
-                "id": place_id,
-                "title": "Cozy Apartment",
-                "latitude": 37.7749,
-                "longitude": -122.4194
-            }
-        ])
-        
-        print("Testing GET /places")
-        data, status = get("places")
-        print(f"Expected: 200, Actual: {status}, Data: {data}")
-        
-        self.assertEqual(status, 200)
-        self.assertEqual(len(data), 1)
-        self.assertEqual(data[0]["title"], "Cozy Apartment")
+    def test_2_create_place_invalid_data(self):
+        invalid_data = {"title": "Incomplete Place"}
+        response = requests.post(BASE_URL_PLACES, json=invalid_data, headers=self.headers)
+        self.assertEqual(response.status_code, 400)
 
-    @patch('requests.get')
-    def test_get_place_details(self, mock_get):
-        place_id = "1fa85f64-5717-4562-b3fc-2c963f66afa6"
-        
-        mock_get.return_value = Mock(status_code=200, json=lambda: {
-            "id": place_id,
-            "title": "Cozy Apartment",
-            "description": "A nice place to stay",
-            "latitude": 37.7749,
-            "longitude": -122.4194,
-            "owner": {
-                "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-                "first_name": "John",
-                "last_name": "Doe"
-            }
-        })
+    def test_3_get_all_places(self):
+        response = requests.get(BASE_URL_PLACES, headers=self.headers)
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertIsInstance(data, list)
 
-        print(f"Testing GET /places/{place_id}")
-        data, status = get(f"places/{place_id}")
-        print(f"Expected: 200, Actual: {status}, Data: {data}")
-        
-        self.assertEqual(status, 200)
-        self.assertEqual(data["title"], "Cozy Apartment")
-        self.assertEqual(data["description"], "A nice place to stay")
-        self.assertEqual(data["owner"]["first_name"], "John")
+    def test_4_get_place_by_id_success(self):
+        response = requests.get(f"{BASE_URL_PLACES}{place_id}", headers=self.headers)
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertEqual(data["id"], place_id)
+        self.assertEqual(data["title"], self.place_data["title"])
+        self.assertIn("owner", data)
+        self.assertIn("amenities", data)
 
+    def test_5_get_place_by_id_not_found(self):
+        response = requests.get(f"{BASE_URL_PLACES}nonexistent_id", headers=self.headers)
+        self.assertEqual(response.status_code, 404)
 
-class TestReviewEndpoint(unittest.TestCase):
+    def test_6_update_place_success(self):
+        updated_data = {
+            "title": "Luxury Condo",
+            "description": "An upscale place to stay",
+            "price": 200.0
+        }
+        response = requests.put(f"{BASE_URL_PLACES}{place_id}", json=updated_data, headers=self.headers)
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertEqual(data["message"], "Place updated successfully")
 
-    @patch('requests.post')
-    @patch('requests.get')
-    @patch('requests.put')
-    @patch('requests.delete')
-    def test_review_endpoint(self, mock_delete, mock_put, mock_get, mock_post):
-        mock_post.return_value = Mock(status_code=201, json=lambda: {
-            "id": "2fa85f64-5717-4562-b3fc-2c963f66afa6",
+    def test_7_update_place_not_found(self):
+        updated_data = {
+            "title": "Nonexistent Condo",
+            "description": "Non-existent description",
+            "price": 200.0
+        }
+        response = requests.put(f"{BASE_URL_PLACES}nonexistent_id", json=updated_data, headers=self.headers)
+        self.assertEqual(response.status_code, 404)
+
+    def test_8_update_place_invalid_data(self):
+        invalid_data = {"price": "invalid-price"}
+        response = requests.put(f"{BASE_URL_PLACES}{place_id}", json=invalid_data, headers=self.headers)
+        self.assertEqual(response.status_code, 400)
+
+    def test_9_add_amenity(self):
+        response = requests.post(f"{BASE_URL_PLACES}{place_id}/add_amenity/{amenities_id}", headers=self.headers)
+        self.assertEqual(response.status_code, 200)
+
+class Test_4_ReviewAPI(unittest.TestCase):
+
+    def setUp(self):
+        self.headers = {"Content-Type": "application/json"}
+        self.review_data = {
             "text": "Great place to stay!",
             "rating": 5,
-            "user_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-            "place_id": "1fa85f64-5717-4562-b3fc-2c963f66afa6"
-        })
+            "user_id": user_id,
+            "place_id": place_id
+        }
 
-        print("Testing POST /reviews with valid input")
-        data, status = post("reviews/", {
-            "text": "Great place to stay!",
-            "rating": 5,
-            "user_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-            "place_id": "1fa85f64-5717-4562-b3fc-2c963f66afa6"
-        })
-        print(f"Expected: 201, Actual: {status}, Data: {data}")
+    def test_01_create_review_success(self):
+        response = requests.post(BASE_URL_REVIEWS, json=self.review_data, headers=self.headers)
+        self.assertEqual(response.status_code, 201)
+        data = response.json()
+        self.assertIn("id", data)
 
-        self.assertEqual(status, 201)
-        self.assertEqual(data["text"], "Great place to stay!")
-        self.assertEqual(data["rating"], 5)
+        global review_id
+        review_id = data["id"]
 
-        mock_get.return_value = Mock(status_code=200, json=lambda: [
-            {
-                "id": "2fa85f64-5717-4562-b3fc-2c963f66afa6",
-                "text": "Great place to stay!",
-                "rating": 5
-            }
-        ])
+    def test_02_create_review_invalid_data(self):
+        invalid_data = {"text": "Incomplete"}
+        response = requests.post(BASE_URL_REVIEWS, json=invalid_data, headers=self.headers)
+        self.assertEqual(response.status_code, 400)
 
-        print("Testing GET /reviews")
-        data, status = get("reviews")
-        print(f"Expected: 200, Actual: {status}, Data: {data}")
-        review_id = data[0]['id']
-        self.assertEqual(status, 200)
-        self.assertEqual(len(data), 1)
-        self.assertEqual(data[0]['text'], "Great place to stay!")
+    def test_03_get_reviews_success(self):
+        response = requests.get(BASE_URL_REVIEWS, headers=self.headers)
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertIsInstance(data, list)
 
-        mock_get.return_value = Mock(status_code=200, json=lambda: {
-            "id": "2fa85f64-5717-4562-b3fc-2c963f66afa6",
-            "text": "Great place to stay!",
-            "rating": 5,
-            "user_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-            "place_id": "1fa85f64-5717-4562-b3fc-2c963f66afa6"
-        })
+    def test_04_get_review_success(self):
+        response = requests.get(f"{BASE_URL_REVIEWS}{review_id}", headers=self.headers)
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertEqual(data["id"], review_id)
 
-        print("Testing GET /reviews/<id>")
-        data, status = get(f"reviews/{review_id}")
-        print(f"Expected: 200, Actual: {status}, Data: {data}")
+    def test_05_get_review_not_found(self):
+        response = requests.get(f"{BASE_URL_REVIEWS}nonexistent_id", headers=self.headers)
+        self.assertEqual(response.status_code, 404)
 
-        self.assertEqual(status, 200)
-        self.assertEqual(data["text"], "Great place to stay!")
+    def test_06_update_review_success(self):
+        updated_data = {"text": "Amazing stay!", "rating": 4}
+        response = requests.put(f"{BASE_URL_REVIEWS}{review_id}", json=updated_data, headers=self.headers)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["message"], "Review updated successfully")
 
-        mock_put.return_value = Mock(status_code=200, json=lambda: {
-            "message": "Review updated successfully"
-        })
+    def test_07_update_review_not_found(self):
+        updated_data = {"text": "Amazing stay!", "rating": 4}
+        response = requests.put(f"{BASE_URL_REVIEWS}nonexistent_id", json=updated_data, headers=self.headers)
+        self.assertEqual(response.status_code, 404)
 
-        print("Testing PUT /reviews/<id> with valid input")
-        data, status = put("reviews/2fa85f64-5717-4562-b3fc-2c963f66afa6", {
-            "text": "Amazing experience!",
-            "rating": 5
-        })
-        print(f"Expected: 200, Actual: {status}, Data: {data}")
+    def test_08_update_review_invalid_data(self):
+        invalid_data = {"rating": "not-a-number"}
+        response = requests.put(f"{BASE_URL_REVIEWS}{review_id}", json=invalid_data, headers=self.headers)
+        self.assertEqual(response.status_code, 400)
 
-        self.assertEqual(status, 200)
-        self.assertEqual(data["message"], "Review updated successfully")
+    def test_09_delete_review_success(self):
+        response = requests.delete(f"{BASE_URL_REVIEWS}{review_id}", headers=self.headers)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["message"], "Review deleted successfully")
 
-        mock_delete.return_value = Mock(status_code=200, json=lambda: {
-            "message": "Review deleted successfully"
-        })
+    def test_10_delete_review_not_found(self):
+        response = requests.delete(f"{BASE_URL_REVIEWS}nonexistent_id", headers=self.headers)
+        self.assertEqual(response.status_code, 404)
 
-        print("Testing DELETE /reviews/<id>")
-        data, status = delete("reviews/2fa85f64-5717-4562-b3fc-2c963f66afa6")
-        print(f"Expected: 200, Actual: {status}, Data: {data}")
+    def test_11_get_reviews_for_place_success(self):
+        ureview_data = {
+            "text": "Hello",
+            "rating": 3,
+            "user_id": user_id,
+            "place_id": place_id
+        }
+        requests.post(BASE_URL_REVIEWS, json=self.review_data, headers=self.headers)
+        requests.post(BASE_URL_REVIEWS, json=ureview_data, headers=self.headers)
 
-        self.assertEqual(status, 200)
-        self.assertEqual(data["message"], "Review deleted successfully")
+        response = requests.get(f"{BASE_URL_REVIEWS}places/{self.review_data['place_id']}/reviews", headers=self.headers)
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertIsInstance(data, list)
 
+    def test_12_get_reviews_for_place_not_found(self):
+        response = requests.get(f"{BASE_URL_REVIEWS}places/nonexistent_id/reviews", headers=self.headers)
+        self.assertEqual(response.status_code, 404)
 
 if __name__ == '__main__':
     unittest.main()

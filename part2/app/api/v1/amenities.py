@@ -54,5 +54,6 @@ class AmenityResource(Resource):
         try:
             facade.update_amenity(amenity_id, api.payload)
         except Exception as e:
-            return {"error": "Invalid input data"}
+            return {"error": "Invalid input data"}, 400
+
         return {"message": "Amenity updated successfully"}, 200
