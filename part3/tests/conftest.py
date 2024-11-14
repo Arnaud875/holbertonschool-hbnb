@@ -55,9 +55,9 @@ def client():
     with app.test_client() as client:
         yield client
 
-    # with app.app_context():
-    #     db.session.remove()
-    #     db.drop_all()
+    with app.app_context():
+        db.session.remove()
+        db.drop_all()
 
 @pytest.fixture(scope="session")
 def auth_client(client: FlaskClient, shared_data: SharedData) -> AuthenticatedClient:

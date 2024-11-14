@@ -3,35 +3,52 @@
 ## Structure of project
 ```
 hbnb/
-├── app/
-│ ├── __init__.py
-│ ├── api/
-│ │ ├── __init__.py
-│ │ ├── v1/
-│ │ ├── __init__.py
-│ │ ├── users.py
-│ │ ├── places.py
-│ │ ├── reviews.py
-│ │ ├── amenities.py
-│ ├── models/
-│ │ ├── __init__.py
-│ │ ├── user.py
-│ │ ├── place.py
-│ │ ├── review.py
-│ │ ├── amenity.py
-│ ├── services/
-│ │ ├── __init__.py
-│ │ ├── facade.py
-│ ├── persistence/
-│ ├── __init__.py
-│ ├── repository.py
-├── tests/
-| ├── models.py
-| ├── api.py
-├── run.py
-├── config.py
-├── requirements.txt
-├── README.md
+ |-app
+ | |-persistence
+ | | |-places.py
+ | | |-amenities.py
+ | | |-user.py
+ | | |-reviews.py
+ | | |-repository.py
+ | | |-__init__.py
+ | |-__init__.py
+ | |-api
+ | | |-v1
+ | | | |-reviews.py
+ | | | |-__init__.py
+ | | | |-auth.py
+ | | | |-amenities.py
+ | | | |-admin.py
+ | | | |-users.py
+ | | | |-places.py
+ | | |-__init__.py
+ | |-models
+ | | |-place.py
+ | | |-review.py
+ | | |-base.py
+ | | |-user.py
+ | | |-amenity.py
+ | | |-__init__.py
+ | |-services
+ | | |-__init__.py
+ | | |-facade.py
+ |-diagram.md
+ |-instance
+ | |-development.db
+ |-tests
+ | |-test_02_places.py
+ | |-test_05_admin.py
+ | |-test_04_amenities.py
+ | |-conftest.py
+ | |-utils.py
+ | |-test_database.sql
+ | |-test_01_users.py
+ | |-test_03_reviews.py
+ | |-create_database.sql
+ |-README.md
+ |-requirements.txt
+ |-config.py
+ |-run.py
 ```
 
 **Explanation:**
@@ -46,17 +63,73 @@ hbnb/
 - `requirements.txt` will list all the Python packages needed for the project.
 - `README.md` will contain a brief overview of the project.
 
-#### Run server
-```
-python run.py
+
+### Command
+```markdown
+#Run server:
+    python run.py
+
+#Run api test (tests folder):
+    pytest -s -v --disable-warnings
+
+#Create database and test (tests folder):
+    mysql -hlocalhost -u <user> -p <create_database.sql || test_database.sql>
 ```
 
-#### Run models test
-```
-python tests/models.py
+### Database diagram
+```mermaid
+erDiagram
+    USER {
+        varchar(36) id PK
+        varchar(255) first_name
+        varchar(255) last_name
+        varchar(255) email UK
+        varchar(255) password
+        boolean is_admin
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    PLACE {
+        varchar(36) id PK
+        varchar(255) title
+        text description
+        decimal price
+        float latitude
+        float longitude
+        varchar(36) owner_id FK
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    REVIEW {
+        varchar(36) id PK
+        text text
+        int rating
+        varchar(36) user_id FK
+        varchar(36) place_id FK
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    AMENITY {
+        varchar(36) id PK
+        varchar(255) name UK
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    PLACE_AMENITY {
+        varchar(36) place_id PK,FK
+        varchar(36) amenity_id PK,FK
+        timestamp created_at
+    }
+
+    USER ||--o{ PLACE : owns
+    USER ||--o{ REVIEW : writes
+    PLACE ||--o{ REVIEW : receives
+    PLACE }|--|{ AMENITY : has
+    PLACE ||--|{ PLACE_AMENITY : contains
+    AMENITY ||--|{ PLACE_AMENITY : included_in
 ```
 
-#### Run api test
-```
-python tests/api.py
-```
