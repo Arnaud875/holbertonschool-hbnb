@@ -133,3 +133,70 @@ erDiagram
     AMENITY ||--|{ PLACE_AMENITY : included_in
 ```
 
+```mermaid
+erDiagram
+    USER {
+        char(36) id PK
+        varchar(255) first_name
+        varchar(255) last_name
+        varchar(255) email UK
+        varchar(255) password
+        boolean is_admin
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    PLACE {
+        char(36) id PK
+        varchar(255) title
+        text description
+        decimal price
+        float latitude
+        float longitude
+        char(36) owner_id FK
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    REVIEW {
+        char(36) id PK
+        text text
+        int rating
+        char(36) user_id FK
+        char(36) place_id FK
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    AMENITY {
+        char(36) id PK
+        varchar(255) name UK
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    PLACE_AMENITY {
+        char(36) place_id PK,FK
+        char(36) amenity_id PK,FK
+        timestamp created_at
+    }
+
+    RESERVATION {
+        char(36) id PK
+        datetime start_date
+        datetime end_date
+        char(36) user_id FK
+        char(36) place_id FK
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    USER ||--o{ PLACE : owns
+    USER ||--o{ REVIEW : writes
+    USER ||--o{ RESERVATION : makes
+    PLACE ||--o{ REVIEW : receives
+    PLACE ||--o{ RESERVATION : hosts
+    PLACE }|--|{ AMENITY : has
+    PLACE ||--|{ PLACE_AMENITY : contains
+    AMENITY ||--|{ PLACE_AMENITY : included_in
+```
