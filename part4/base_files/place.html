@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Place Details</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header class="header">
+        <img src="images/logo.png" alt="Logo" class="logo">
+        <nav class="nav-bar">
+            <a href="index.html">Home</a>
+            <a id="login-link" href="login.html" class="login-button">Login</a>
+        </nav>
+    </header>
+
+    <div class="container">
+        <div class="place-details">
+            <h1 id="place-title">Beautiful Beach House</h1>
+
+            <div class="place-info">
+                <p id="place-user"><strong>Host:</strong> John Doe</p>
+                <p id="place-price"><strong>Price per night:</strong> $150</p>
+                <p id="place-description"><strong>Description:</strong> A beautiful beach house with amazing views...</p>
+
+                <div id="place-amenities" class="amenities">
+                    <span class="amenity">WiFi</span>
+                    <span class="amenity">Pool</span>
+                    <span class="amenity">Air Conditioning</span>
+                </div>
+            </div>
+        </div>
+
+        <section id="reviews-section" class="reviews-section">
+            <h2>Reviews</h2>
+            <div class="review-card">
+                <p class="review-author">Jane Smith</p>
+                <p>Great place to stay!</p>
+                <div class="rating">★★★★☆</div>
+            </div>
+            <div class="review-card">
+                <p class="review-author">Robert Brown</p>
+                <p>Amazing location and very comfortable.</p>
+                <div class="rating">★★★★★</div>
+            </div>
+
+            <a href="add_review.html" class="details-button">Add Review</a>
+        </section>
+    </div>
+
+    <footer class="footer">
+        © 2024 HBnB Evolution. All rights reserved.
+    </footer>
+    <script src="scripts.js"></script>
+</body>
+</html>
